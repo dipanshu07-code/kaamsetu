@@ -176,6 +176,12 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/blueprint" className="text-teal-300 hover:text-teal-200 font-semibold transition-colors flex items-center gap-1">
+                  <span>Business Blueprint</span>
+                  <span className="text-[9px] bg-teal-500/20 text-teal-300 px-1.5 py-0.2 rounded border border-teal-500/30">PDF Plan</span>
+                </Link>
+              </li>
+              <li>
                 <Link href="/admin" className="text-amber-400 hover:text-amber-300 transition-colors flex items-center gap-1">
                   <span>Admin Console</span>
                 </Link>

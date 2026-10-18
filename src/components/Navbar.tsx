@@ -102,6 +102,15 @@ export default function Navbar() {
             </Link>
 
             <Link
+              href="/blueprint"
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                pathname === '/blueprint' ? 'text-teal-800 bg-teal-50 font-semibold' : 'text-slate-600 hover:text-teal-800 hover:bg-slate-50'
+              }`}
+            >
+              Blueprint
+            </Link>
+
+            <Link
               href="/worker/register"
               className="px-3 py-1.5 rounded-lg text-sm font-medium text-teal-700 hover:text-teal-800 hover:bg-teal-50 transition-colors flex items-center gap-1"
             >
@@ -206,6 +215,13 @@ export default function Navbar() {
             className="block px-3 py-2 rounded-lg text-base font-medium text-slate-800 hover:bg-slate-50"
           >
             {dict.navAbout}
+          </Link>
+          <Link
+            href="/blueprint"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block px-3 py-2 rounded-lg text-base font-medium text-teal-700 hover:bg-teal-50"
+          >
+            Business Blueprint
           </Link>
 
           <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
