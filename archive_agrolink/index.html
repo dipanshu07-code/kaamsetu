@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgroLink – Fresh from the farm, straight to you</title>
+  <meta name="description" content="AgroLink connects farmers directly with consumers. Buy fresh, verified produce straight from the farm.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════
+     AUTH SCREENS
+════════════════════════════════════════════════════════════════ -->
+
+<!-- LOGIN -->
+<div id="screen-login" class="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">🌿</div>
+      <h1>AgroLink</h1>
+      <p>Fresh from the farm, straight to you</p>
+    </div>
+
+    <div class="role-tabs">
+      <button class="role-tab active" data-role="farmer">🌾 Farmer</button>
+      <button class="role-tab" data-role="consumer">🛒 Buyer</button>
+      <button class="role-tab" data-role="admin">⚙️ Admin</button>
+    </div>
+
+    <div class="demo-hint" id="demo-hint">
+      <strong>Demo:</strong> rajesh@farm.in / farm123
+    </div>
+
+    <form id="login-form">
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input class="form-input" id="login-email" type="email" placeholder="you@example.com" required autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" id="login-pass" type="password" placeholder="••••••••" required autocomplete="current-password">
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-full">
+        Sign In →
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      New here? <a href="#" id="back-to-login" onclick="showScreen('screen-signup');return false;">Create account</a>
+    </div>
+  </div>
+</div>
+
+<!-- OTP VERIFICATION -->
+<div id="screen-otp" class="auth-screen hidden">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">🔐</div>
+      <h1>Verify OTP</h1>
+      <p>Enter the 6-digit code sent to<br><strong id="otp-email-hint" style="color:var(--text);">your email</strong></p>
+    </div>
+
+    <div class="demo-hint">
+      <strong>Demo OTP:</strong> 1 2 3 4 5 6
+    </div>
+
+    <form id="otp-form">
+      <div class="otp-row">
+        <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+        <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+        <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+        <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+        <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+        <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+      </div>
+      <button type="submit" class="btn btn-primary btn-full">Verify &amp; Continue →</button>
+    </form>
+
+    <div class="auth-footer" style="margin-top:16px;">
+      <a href="#" id="otp-back">← Back to Login</a>
+    </div>
+  </div>
+</div>
+
+<!-- SIGNUP -->
+<div id="screen-signup" class="auth-screen hidden">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">🌿</div>
+      <h1>Create Account</h1>
+      <p>Join the AgroLink community</p>
+    </div>
+
+    <form id="signup-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input class="form-input" type="text" placeholder="Your name" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Role</label>
+          <select class="form-input">
+            <option>Farmer</option>
+            <option>Buyer / Consumer</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input class="form-input" type="email" placeholder="you@example.com" required>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input class="form-input" type="password" placeholder="Min 6 characters" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input class="form-input" type="tel" placeholder="10-digit number">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full">Create Account</button>
+    </form>
+
+    <div class="auth-footer">
+      Already have an account? <a href="#" onclick="showScreen('screen-login');return false;">Sign In</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MAIN APP SHELL
+════════════════════════════════════════════════════════════════ -->
+
+<div id="screen-app" class="hidden">
+
+  <!-- Header -->
+  <header id="app-header">
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+
+    <a class="header-logo" href="#">
+      <div class="header-logo-icon">🌿</div>
+      AgroLink
+      <span class="header-tagline">Fresh from the farm</span>
+    </a>
+
+    <div class="header-spacer"></div>
+
+    <div class="header-right">
+      <!-- Cart button (shown for buyers) -->
+      <button class="cart-header-btn" id="cart-header-btn" aria-label="Cart">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        Cart <span class="cart-count-badge" id="cart-count">0</span>
+      </button>
+
+      <img class="header-avatar" id="header-avatar" src="" alt="User">
+      <div class="header-user-info">
+        <div class="header-username" id="header-name">User</div>
+        <div class="header-role" id="header-role">—</div>
+      </div>
+
+      <button class="btn btn-ghost btn-sm" id="logout-btn">Logout</button>
+    </div>
+  </header>
+
+  <!-- App body -->
+  <div class="app-body">
+
+    <!-- Sidebar -->
+    <aside id="app-sidebar">
+      <div class="sidebar-user-card">
+        <img class="sidebar-avatar" id="sidebar-avatar" src="" alt="">
+        <div>
+          <div class="sidebar-name" id="sidebar-name">User</div>
+          <div class="sidebar-role-tag" id="sidebar-role">Role</div>
+        </div>
+      </div>
+      <nav class="sidebar-nav" id="sidebar-nav">
+        <!-- Populated by JS -->
+      </nav>
+      <div class="sidebar-footer">
+        <button class="nav-item" id="logout-sidebar" onclick="logout()" style="color:#dc2626;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main id="app-main">
+
+      <!-- ── FARMER PANELS ── -->
+      <div id="panel-farmer-home"     class="panel"></div>
+      <div id="panel-farmer-products" class="panel"></div>
+      <div id="panel-farmer-add"      class="panel"></div>
+      <div id="panel-farmer-orders"   class="panel"></div>
+      <div id="panel-farmer-earnings" class="panel"></div>
+      <div id="panel-farmer-forecast" class="panel"></div>
+      <div id="panel-farmer-logistics"class="panel"></div>
+
+      <!-- ── BUYER PANELS ── -->
+      <div id="panel-buyer-home"     class="panel"></div>
+      <div id="panel-buyer-product"  class="panel"></div>
+      <div id="panel-buyer-cart"     class="panel"></div>
+      <div id="panel-buyer-checkout" class="panel"></div>
+      <div id="panel-buyer-tracking" class="panel"></div>
+      <div id="panel-buyer-orders"   class="panel"></div>
+
+      <!-- ── ADMIN PANELS ── -->
+      <div id="panel-admin-home"      class="panel"></div>
+      <div id="panel-admin-users"     class="panel"></div>
+      <div id="panel-admin-products"  class="panel"></div>
+      <div id="panel-admin-analytics" class="panel"></div>
+
+    </main>
+  </div><!-- .app-body -->
+</div><!-- #screen-app -->
+
+<!-- Sidebar overlay (mobile) -->
+<div id="sidebar-overlay" class="hidden"></div>
+
+<!-- Toast notification -->
+<div id="toast" class="toast-hide">Message</div>
+
+<!-- Scripts -->
+<script src="/js/data.js"></script>
+<script src="/js/app.js"></script>
+
+</body>
+</html>
