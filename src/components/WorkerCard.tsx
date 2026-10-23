@@ -1,178 +1,90 @@
 'use client';
 
-import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { WorkerProfile } from '@/types';
-import { formatINR, dictionary } from '@/lib/utils';
-import { useAppStore } from '@/lib/store';
-import { 
-  Star, 
-  MapPin, 
-  CheckCircle2, 
-  ShieldCheck, 
-  Clock, 
-  Calendar, 
-  ArrowRight,
-  ShieldAlert,
-  Award
-} from 'lucide-react';
+import { CalendarX2, CalendarCheck, MapPin, CircleDashed } from 'lucide-react';
+import { useI18n } from '@/lib/i18n';
+import { Avatar, IndicativeRates, Rating, VerificationBadge } from './domain';
+import { Badge } from './ui';
 
-interface WorkerCardProps {
-  worker: WorkerProfile;
-  onRequestBooking?: (worker: WorkerProfile) => void;
+export interface WorkerSummary {
+  id: string;
+  fullName: string;
+  fullNameHi: string | null;
+  avatarUrl: string | null;
+  category: string;
+  experienceYears: number;
+  locality: string;
+  city: string;
+  headline: string | null;
+  skills: string[];
+  verificationStatus: string;
+  rating: number | null;
+  reviewCount: number;
+  completedJobsCount: number;
+  isDemoProfile: boolean;
+  isAvailableToday: boolean;
+  hourlyRate: number | null;
+  visitCharge: number | null;
+  baseRate: number | null;
+  pricingBasis: string;
+  distanceKm: number | null;
+  slot: 'available' | 'unavailable' | 'hours_not_set' | null;
 }
 
-export default function WorkerCard({ worker, onRequestBooking }: WorkerCardProps) {
-  const { language } = useAppStore();
-  const dict = dictionary[language];
+/** Distances are approximate (area centre to area centre), so very small values read as "under 1 km". */
+export function distanceLabel(t: (k: 'common.aboutKm' | 'common.underOneKm', v?: Record<string, number>) => string, km: number) {
+  return km < 1 ? t('common.underOneKm') : t('common.aboutKm', { n: km });
+}
 
-  const isVerified = worker.verificationStatus === 'verified';
-
+export default function WorkerCard({ w, bookHref }: { w: WorkerSummary; bookHref?: string }) {
+  const { t, tk, lang } = useI18n();
+  const name = lang === 'hi' && w.fullNameHi ? w.fullNameHi : w.fullName;
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all flex flex-col justify-between overflow-hidden group">
-      <div>
-        {/* Card Header & Avatar */}
-        <div className="p-5 pb-4">
-          <div className="flex items-start gap-4">
-            <div className="relative w-16 h-16 rounded-2xl overflow-hidden bg-slate-100 flex-shrink-0 border border-slate-200">
-              <img
-                src={worker.avatarUrl}
-                alt={worker.fullName}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                loading="lazy"
-              />
-              {worker.isAvailableToday ? (
-                <span 
-                  className="absolute bottom-1 right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full" 
-                  title="Available Today"
-                />
-              ) : (
-                <span 
-                  className="absolute bottom-1 right-1 w-3.5 h-3.5 bg-slate-400 border-2 border-white rounded-full" 
-                  title="Book in advance"
-                />
-              )}
-            </div>
-
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <h3 className="font-bold text-slate-900 text-base leading-snug truncate">
-                  {language === 'hi' && worker.fullNameHi ? worker.fullNameHi : worker.fullName}
-                </h3>
-              </div>
-
-              <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-1">
-                <MapPin className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-                <span className="truncate">{worker.locality}, {worker.city}</span>
-              </div>
-
-              {/* Rating & Experience */}
-              <div className="flex items-center gap-3 mt-2 text-xs">
-                <div className="flex items-center gap-1 font-semibold text-slate-900 bg-amber-50 px-2 py-0.5 rounded border border-amber-200/60">
-                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
-                  <span>{worker.rating.toFixed(1)}</span>
-                  <span className="text-slate-400 font-normal">({worker.reviewCount})</span>
-                </div>
-
-                <span className="text-slate-500">
-                  {worker.experienceYears} yrs exp
-                </span>
-
-                <span className="text-slate-300">•</span>
-
-                <span className="text-slate-600 font-medium">
-                  {worker.completedJobsCount} jobs
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Verification Badge (Transparent distinction between verified vs self-reported) */}
-          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-            {isVerified ? (
-              <span className="inline-flex items-center gap-1.5 text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 rounded-full font-medium text-[11px]">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Verified Worker</span>
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full font-medium text-[11px]">
-                <ShieldAlert className="w-3.5 h-3.5 text-amber-600" />
-                <span>Self-Reported Experience</span>
-              </span>
-            )}
-
-            <span className={`text-[11px] font-medium px-2 py-0.5 rounded ${
-              worker.isAvailableToday ? 'text-emerald-700 bg-emerald-50' : 'text-slate-500 bg-slate-100'
-            }`}>
-              {worker.isAvailableToday ? '⚡ Available Today' : '📅 Advance Booking'}
-            </span>
-          </div>
-
-          {/* Short Bio Snippet */}
-          <p className="mt-3 text-xs text-slate-600 line-clamp-2 leading-relaxed">
-            {language === 'hi' && worker.bioHi ? worker.bioHi : worker.bio}
+    <article className="card flex flex-col gap-3 p-4">
+      <div className="flex items-start gap-3">
+        <Avatar src={w.avatarUrl} name={w.fullName} size={56} />
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate text-base font-semibold text-stone-900">
+            <Link href={`/workers/${w.id}`} className="hover:underline">
+              {name}
+            </Link>
+          </h3>
+          <p className="text-sm text-stone-700">
+            {tk('cat', w.category)} · {t('common.years', { n: w.experienceYears })}
           </p>
-
-          {/* Specialization tags */}
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {worker.subcategories.slice(0, 3).map((sub, idx) => (
-              <span
-                key={idx}
-                className="text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-normal"
-              >
-                {sub}
-              </span>
-            ))}
-            {worker.subcategories.length > 3 && (
-              <span className="text-[11px] text-slate-400 self-center">
-                +{worker.subcategories.length - 3} more
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Pricing Banner */}
-        <div className="px-5 py-3 bg-slate-50 border-t border-b border-slate-100 flex items-center justify-between">
-          <div>
-            <span className="text-[11px] text-slate-500 block">Starting Rate</span>
-            <div className="flex items-baseline gap-1">
-              <span className="text-base font-bold text-brand-900">
-                {formatINR(worker.baseRate)}
-              </span>
-              <span className="text-xs text-slate-500">
-                /{worker.pricingBasis.replace('per-', '')}
-              </span>
-            </div>
-          </div>
-
-          <div className="text-right">
-            <span className="text-[11px] text-slate-500 block">Arrival Punctuality</span>
-            <span className="text-xs font-semibold text-emerald-700">
-              {worker.onTimeArrivalRatePercent}% On-Time
+          <p className="mt-0.5 flex items-start gap-1 text-sm text-stone-600">
+            <MapPin className="mt-0.5 h-3.5 w-3.5 flex-none" aria-hidden />
+            <span>
+              {w.locality}, {w.city}
+              {w.distanceKm !== null && <span className="block">{distanceLabel(t, w.distanceKm)}</span>}
             </span>
-          </div>
+          </p>
         </div>
       </div>
 
-      {/* Card Action Buttons */}
-      <div className="p-4 bg-white grid grid-cols-2 gap-2">
-        <Link
-          href={`/workers/${worker.id}`}
-          className="w-full py-2.5 px-3 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-semibold transition-colors text-center flex items-center justify-center gap-1"
-        >
-          <Award className="w-3.5 h-3.5 text-teal-600" />
-          <span>Digital Passport</span>
-        </Link>
+      {w.headline && <p className="text-sm text-stone-800">{w.headline}</p>}
 
-        <button
-          onClick={() => onRequestBooking ? onRequestBooking(worker) : null}
-          className="w-full py-2.5 px-3 rounded-xl bg-brand-800 hover:bg-brand-900 text-white text-xs font-semibold transition-all shadow-sm flex items-center justify-center gap-1"
-        >
-          <span>{dict.requestBooking}</span>
-          <ArrowRight className="w-3.5 h-3.5" />
-        </button>
+      <div className="flex flex-wrap gap-1.5">
+        <VerificationBadge status={w.verificationStatus} />
+        {w.slot === 'available' && <Badge tone="green" icon={CalendarCheck}>{t('common.availableAtThisTime')}</Badge>}
+        {w.slot === 'unavailable' && <Badge tone="neutral" icon={CalendarX2}>{t('common.unavailableAtThisTime')}</Badge>}
+        {w.slot === 'hours_not_set' && <Badge tone="neutral" icon={CircleDashed}>{t('common.hoursNotSet')}</Badge>}
+        {w.isDemoProfile && <Badge tone="amber">{t('common.demoProfile')}</Badge>}
       </div>
-    </div>
+
+      <IndicativeRates w={w} />
+      <Rating rating={w.rating} count={w.reviewCount} />
+
+      <div className="mt-auto flex gap-2 pt-1">
+        <Link href={`/workers/${w.id}`} className="inline-flex min-h-[44px] flex-1 items-center justify-center rounded-lg border border-stone-300 bg-white px-3 text-sm font-semibold text-stone-800 hover:bg-stone-50">
+          {t('workers.viewProfile')}
+        </Link>
+        {bookHref && w.slot !== 'unavailable' && (
+          <Link href={bookHref} className="inline-flex min-h-[44px] flex-1 items-center justify-center rounded-lg bg-brand-700 px-3 text-sm font-semibold text-white hover:bg-brand-800">
+            {t('workers.book')}
+          </Link>
+        )}
+      </div>
+    </article>
   );
 }

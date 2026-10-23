@@ -1,58 +1,31 @@
 'use client';
 
 import React from 'react';
+import { Info } from 'lucide-react';
 import { getEstimatedPriceRange, formatINR } from '@/lib/utils';
-import { TrendingUp, Info, ShieldCheck } from 'lucide-react';
+import { useI18n, MessageKey } from '@/lib/i18n';
 
-interface PriceIntelligenceCardProps {
-  categorySlug: string;
-  locality?: string;
-}
-
-export default function PriceIntelligenceCard({ categorySlug, locality }: PriceIntelligenceCardProps) {
+/**
+ * Typical price guide for a category. These ranges are hand-written guides in
+ * lib/utils.ts, not live market data, and the card says so.
+ */
+export default function PriceIntelligenceCard({ categorySlug }: { categorySlug: string; locality?: string }) {
+  const { t, tk } = useI18n();
   const estimate = getEstimatedPriceRange(categorySlug);
-
+  const basisKey = `priceGuide.${categorySlug}` as MessageKey;
+  const basis = t(basisKey) === basisKey ? t('priceGuide.default') : t(basisKey);
   return (
-    <div className="bg-gradient-to-br from-brand-50/70 via-white to-teal-50/50 rounded-2xl border border-brand-200/60 p-4 sm:p-5 shadow-sm">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-brand-800 text-white flex items-center justify-center">
-            <TrendingUp className="w-4 h-4" />
-          </div>
-          <div>
-            <h4 className="text-xs font-bold text-brand-900 uppercase tracking-wider">
-              Local Price Intelligence
-            </h4>
-            <p className="text-[11px] text-slate-500">
-              Locality Benchmark: {locality || 'NCR & Metro Residential Zones'}
-            </p>
-          </div>
-        </div>
-
-        <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
-          Transparent Data
-        </span>
-      </div>
-
-      <div className="flex items-baseline gap-2 mb-2">
-        <span className="text-2xl font-black text-brand-900">
-          {formatINR(estimate.min)} – {formatINR(estimate.max)}
-        </span>
-        <span className="text-xs text-slate-600 font-medium">
-          {estimate.basis}
-        </span>
-      </div>
-
-      <p className="text-xs text-slate-600 leading-relaxed mb-3">
-        {estimate.disclaimer}
+    <div className="rounded-xl border border-stone-200 bg-white p-4">
+      <p className="text-sm font-semibold text-stone-900">
+        {t('priceGuide.title', { category: tk('cat', categorySlug) })}
       </p>
-
-      <div className="flex items-center gap-1.5 text-[11px] text-slate-500 pt-2 border-t border-brand-100">
-        <Info className="w-3.5 h-3.5 text-brand-600 flex-shrink-0" />
-        <span>
-          Final price is mutually confirmed by you and the worker before job execution. No hidden platform markup.
-        </span>
-      </div>
+      <p className="mt-1 text-xl font-bold text-stone-900">
+        {formatINR(estimate.min)} – {formatINR(estimate.max)} <span className="text-sm font-normal text-stone-600">{basis}</span>
+      </p>
+      <p className="mt-2 flex items-start gap-1.5 text-sm text-stone-600">
+        <Info className="mt-0.5 h-4 w-4 flex-none" aria-hidden />
+        {t('priceGuide.disclaimer')}
+      </p>
     </div>
   );
 }

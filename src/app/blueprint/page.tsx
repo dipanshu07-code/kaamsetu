@@ -1,29 +1,17 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { formatINR } from '@/lib/utils';
-import { 
-  FileText, 
-  CheckCircle2, 
-  TrendingUp, 
-  ShieldCheck, 
-  Award, 
-  ArrowRight, 
-  DollarSign, 
-  Layers, 
+import {   
+  TrendingUp,   
+  ArrowRight,   
   Users, 
   AlertTriangle, 
-  HeartHandshake, 
-  Clock, 
-  Calendar, 
-  Target, 
+  HeartHandshake,    
   Sliders, 
   Briefcase,
-  HelpCircle,
-  Sparkles,
   RefreshCw,
-  ExternalLink
 } from 'lucide-react';
 
 export default function BlueprintPage() {
@@ -48,10 +36,15 @@ export default function BlueprintPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16">
+      <p lang="en" className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+        Internal business-planning document, available in English only. Figures are planning assumptions and model inputs, not
+        measured results. The commission scenarios below are hypotheses; the live product currently charges no commission.
+        / यह आंतरिक योजना दस्तावेज़ सिर्फ़ अंग्रेज़ी में है।
+      </p>
       {/* ══════════════════════════════════════════════════════════════
           PAGE TITLE & EXECUTIVE BANNER (Page 1)
       ════════════════════════════════════════════════════════════════ */}
-      <div className="bg-gradient-to-br from-brand-900 via-slate-900 to-brand-950 text-white rounded-3xl p-8 sm:p-12 relative overflow-hidden shadow-2xl space-y-6">
+      <div className="bg-stone-900 text-white rounded-2xl p-8 sm:p-12 relative overflow-hidden space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <span className="text-xs font-bold uppercase tracking-wider text-teal-300 bg-teal-900/60 border border-teal-500/40 px-3.5 py-1 rounded-full">
             Official Planning Blueprint
@@ -615,7 +608,7 @@ export default function BlueprintPage() {
       {/* ══════════════════════════════════════════════════════════════
           SECTION 8: SDGs & SOCIAL IMPACT (Page 9)
       ════════════════════════════════════════════════════════════════ */}
-      <section className="bg-gradient-to-r from-teal-900 to-brand-900 rounded-3xl p-8 sm:p-12 text-white space-y-6 shadow-xl">
+      <section className="bg-stone-900 rounded-2xl p-8 sm:p-12 text-white space-y-6">
         <div className="max-w-2xl space-y-2">
           <span className="text-xs font-bold uppercase tracking-wider text-teal-300">
             Social Development Goals
@@ -629,7 +622,7 @@ export default function BlueprintPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs pt-2">
-          <div className="bg-white/10 border border-white/10 p-5 rounded-2xl backdrop-blur-sm space-y-2">
+          <div className="bg-white/10 border border-white/10 p-5 rounded-2xl space-y-2">
             <span className="text-xs font-bold text-amber-300 uppercase tracking-wider block">SDG 8</span>
             <h3 className="font-bold text-white text-sm">Decent Work & Economic Growth</h3>
             <p className="text-teal-100 leading-relaxed">
@@ -637,7 +630,7 @@ export default function BlueprintPage() {
             </p>
           </div>
 
-          <div className="bg-white/10 border border-white/10 p-5 rounded-2xl backdrop-blur-sm space-y-2">
+          <div className="bg-white/10 border border-white/10 p-5 rounded-2xl space-y-2">
             <span className="text-xs font-bold text-teal-300 uppercase tracking-wider block">SDG 10</span>
             <h3 className="font-bold text-white text-sm">Reduced Inequalities</h3>
             <p className="text-teal-100 leading-relaxed">
@@ -645,7 +638,7 @@ export default function BlueprintPage() {
             </p>
           </div>
 
-          <div className="bg-white/10 border border-white/10 p-5 rounded-2xl backdrop-blur-sm space-y-2">
+          <div className="bg-white/10 border border-white/10 p-5 rounded-2xl space-y-2">
             <span className="text-xs font-bold text-blue-300 uppercase tracking-wider block">SDG 9</span>
             <h3 className="font-bold text-white text-sm">Industry & Infrastructure</h3>
             <p className="text-teal-100 leading-relaxed">

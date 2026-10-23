@@ -3,36 +3,57 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 15, 23, 42;
-  --background-start-rgb: 248, 250, 252;
-  --background-end-rgb: 255, 255, 255;
+  color-scheme: light;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: #f8fafc;
+  background: #faf8f5;
+  color: #1c1917;
   min-height: 100vh;
-  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
-/* Custom subtle scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* Devanagari needs a little more line height to avoid clipped matras. */
+html[lang='hi'] body {
+  line-height: 1.65;
 }
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+
+/* Clear, consistent keyboard focus. */
+:focus-visible {
+  outline: 3px solid #c2410c;
+  outline-offset: 2px;
   border-radius: 4px;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
-/* Focus styles */
-button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
-  outline: 2px solid #1e3a8a;
-  outline-offset: 2px;
+@layer components {
+  .input {
+    @apply block w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-base text-stone-900 placeholder:text-stone-400
+      focus:border-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-700/25 disabled:bg-stone-100 disabled:text-stone-500;
+  }
+  .input[aria-invalid='true'] {
+    @apply border-red-600 focus:border-red-600 focus:ring-red-600/25;
+  }
+  .card {
+    @apply rounded-xl border border-stone-200 bg-white;
+  }
+  .container-page {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6;
+  }
+  .link {
+    @apply font-medium text-brand-800 underline underline-offset-2 hover:text-brand-900;
+  }
 }

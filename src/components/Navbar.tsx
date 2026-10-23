@@ -1,238 +1,204 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useAppStore } from '@/lib/store';
-import { dictionary } from '@/lib/utils';
-import { 
-  Menu, 
-  X, 
-  Briefcase, 
-  Search, 
-  UserCheck, 
-  ShieldAlert, 
-  HardHat, 
-  Calendar,
-  LogOut,
-  ChevronRight,
-  Handshake
-} from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Bell, Menu, MessageSquare, X } from 'lucide-react';
+import { useI18n, MessageKey } from '@/lib/i18n';
+import { dashboardPath, useSession } from '@/lib/session';
+import { cn } from '@/lib/utils';
+import LanguageSwitch, { LanguageToggle } from './LanguageSwitch';
+
+type NavItem = { href: string; key: MessageKey };
+
+function navFor(role: string | undefined): NavItem[] {
+  switch (role) {
+    case 'customer':
+      return [
+        { href: '/requests/new', key: 'nav.getRepair' },
+        { href: '/workers', key: 'nav.findWorkers' },
+        { href: '/customer/dashboard', key: 'nav.dashboard' },
+      ];
+    case 'worker':
+      return [
+        { href: '/worker/alerts', key: 'nav.workerAlerts' },
+        { href: '/worker/schedule', key: 'nav.schedule' },
+        { href: '/jobs', key: 'nav.jobs' },
+        { href: '/worker/dashboard', key: 'nav.dashboard' },
+      ];
+    case 'employer':
+      return [
+        { href: '/employer/jobs/new', key: 'nav.postJob' },
+        { href: '/employer/dashboard', key: 'nav.employerJobs' },
+        { href: '/workers', key: 'nav.findWorkers' },
+      ];
+    case 'admin':
+      return [
+        { href: '/admin', key: 'nav.admin' },
+        { href: '/workers', key: 'nav.findWorkers' },
+        { href: '/jobs', key: 'nav.jobs' },
+      ];
+    default:
+      return [
+        { href: '/requests/new', key: 'nav.getRepair' },
+        { href: '/workers', key: 'nav.findWorkers' },
+        { href: '/jobs', key: 'nav.jobs' },
+        { href: '/how-it-works', key: 'nav.howItWorks' },
+      ];
+  }
+}
+
+function secondaryFor(role: string | undefined): NavItem[] {
+  switch (role) {
+    case 'customer':
+      return [
+        { href: '/jobs', key: 'nav.jobs' },
+        { href: '/grievance', key: 'nav.grievance' },
+        { href: '/account', key: 'nav.account' },
+      ];
+    case 'worker':
+      return [
+        { href: '/worker/profile', key: 'nav.myProfile' },
+        { href: '/worker/applications', key: 'nav.applications' },
+        { href: '/worker/verification', key: 'nav.verification' },
+        { href: '/grievance', key: 'nav.grievance' },
+        { href: '/account', key: 'nav.account' },
+      ];
+    case 'employer':
+      return [
+        { href: '/jobs', key: 'nav.jobs' },
+        { href: '/grievance', key: 'nav.grievance' },
+        { href: '/account', key: 'nav.account' },
+      ];
+    case 'admin':
+      return [{ href: '/account', key: 'nav.account' }];
+    default:
+      return [
+        { href: '/worker/register', key: 'nav.becomeWorker' },
+        { href: '/about', key: 'nav.about' },
+        { href: '/grievance', key: 'nav.grievance' },
+      ];
+  }
+}
+
+function CountBadge({ n }: { n: number }) {
+  if (!n) return null;
+  return (
+    <span className="absolute -right-1 -top-1 min-w-[18px] rounded-full bg-brand-700 px-1 text-center text-[11px] font-bold leading-[18px] text-white">
+      {n > 9 ? '9+' : n}
+    </span>
+  );
+}
 
 export default function Navbar() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
-  const { currentUser, language, logout } = useAppStore();
-  const dict = dictionary[language];
+  const router = useRouter();
+  const { t } = useI18n();
+  const { user, logout } = useSession();
+  const [open, setOpen] = useState(false);
+  const items = navFor(user?.role);
+  const more = secondaryFor(user?.role);
 
-  const getDashboardHref = () => {
-    if (!currentUser) return '/login';
-    if (currentUser.role === 'worker') return '/worker/dashboard';
-    if (currentUser.role === 'admin') return '/admin';
-    return '/customer/dashboard';
-  };
+  useEffect(() => setOpen(false), [pathname]);
 
-  const getDashboardLabel = () => {
-    if (!currentUser) return dict.navLogin;
-    if (currentUser.role === 'worker') return 'Worker Portal';
-    if (currentUser.role === 'admin') return 'Admin Dashboard';
-    return 'Customer Portal';
+  const isActive = (href: string) => pathname === href || (href !== '/' && pathname.startsWith(href + '/'));
+  const doLogout = async () => {
+    await logout();
+    router.push('/');
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 transition-all shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Brand Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-900 via-brand-800 to-teal-600 flex items-center justify-center text-white shadow-md shadow-brand-900/10 group-hover:scale-105 transition-transform">
-              <Handshake className="w-5 h-5 text-teal-300" />
+    <header className="sticky top-0 z-40 border-b border-stone-200 bg-white">
+      <div className="container-page flex h-16 items-center justify-between gap-3">
+        <Link href={user ? dashboardPath(user.role) : '/'} className="flex items-center gap-2" aria-label={t('common.brand')}>
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-stone-900 text-sm font-bold text-white" aria-hidden>
+            KS
+          </span>
+          <span className="text-lg font-bold tracking-tight text-stone-900">{t('common.brand')}</span>
+        </Link>
+
+        <nav aria-label={t('nav.main')} className="hidden items-center gap-1 lg:flex">
+          {items.map((i) => (
+            <Link
+              key={i.href}
+              href={i.href}
+              aria-current={isActive(i.href) ? 'page' : undefined}
+              className={cn(
+                'rounded-lg px-3 py-2 text-sm font-semibold',
+                isActive(i.href) ? 'bg-brand-50 text-brand-900' : 'text-stone-700 hover:bg-stone-100',
+              )}
+            >
+              {t(i.key)}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="flex items-center gap-2">
+          <LanguageSwitch className="hidden sm:inline-flex" />
+          <LanguageToggle className="sm:hidden" />
+          {user && (
+            <>
+              <Link href="/messages" className="relative rounded-lg p-2 text-stone-700 hover:bg-stone-100" aria-label={t('nav.messages')}>
+                <MessageSquare className="h-5 w-5" aria-hidden />
+                <CountBadge n={user.unreadConversations} />
+              </Link>
+              <Link href="/notifications" className="relative rounded-lg p-2 text-stone-700 hover:bg-stone-100" aria-label={t('nav.notifications')}>
+                <Bell className="h-5 w-5" aria-hidden />
+                <CountBadge n={user.unreadNotifications} />
+              </Link>
+            </>
+          )}
+          {!user && (
+            <div className="hidden items-center gap-2 lg:flex">
+              <Link href="/login" className="rounded-lg px-3 py-2 text-sm font-semibold text-stone-800 hover:bg-stone-100">
+                {t('nav.login')}
+              </Link>
+              <Link href="/signup" className="rounded-lg bg-brand-700 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-800">
+                {t('nav.signup')}
+              </Link>
             </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-xl tracking-tight text-brand-900">
-                  Kaam<span className="text-teal-600">Setu</span>
-                </span>
-                <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-brand-50 text-brand-700 border border-brand-200">
-                  India
-                </span>
-              </div>
-              <p className="text-[10px] text-slate-500 font-medium tracking-tight -mt-0.5 hidden sm:block">
-                Connecting Local Workers with Trusted Opportunities
-              </p>
-            </div>
-          </Link>
-
-          {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-1 lg:gap-2">
-            <Link
-              href="/"
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                pathname === '/' ? 'text-brand-800 bg-brand-50 font-semibold' : 'text-slate-600 hover:text-brand-800 hover:bg-slate-50'
-              }`}
-            >
-              Home
-            </Link>
-
-            <Link
-              href="/workers"
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                pathname.startsWith('/workers') ? 'text-brand-800 bg-brand-50 font-semibold' : 'text-slate-600 hover:text-brand-800 hover:bg-slate-50'
-              }`}
-            >
-              {dict.navFindWorkers}
-            </Link>
-
-            <Link
-              href="/how-it-works"
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                pathname === '/how-it-works' ? 'text-brand-800 bg-brand-50 font-semibold' : 'text-slate-600 hover:text-brand-800 hover:bg-slate-50'
-              }`}
-            >
-              {dict.navHowItWorks}
-            </Link>
-
-            <Link
-              href="/about"
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                pathname === '/about' ? 'text-brand-800 bg-brand-50 font-semibold' : 'text-slate-600 hover:text-brand-800 hover:bg-slate-50'
-              }`}
-            >
-              {dict.navAbout}
-            </Link>
-
-            <Link
-              href="/blueprint"
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                pathname === '/blueprint' ? 'text-teal-800 bg-teal-50 font-semibold' : 'text-slate-600 hover:text-teal-800 hover:bg-slate-50'
-              }`}
-            >
-              Blueprint
-            </Link>
-
-            <Link
-              href="/worker/register"
-              className="px-3 py-1.5 rounded-lg text-sm font-medium text-teal-700 hover:text-teal-800 hover:bg-teal-50 transition-colors flex items-center gap-1"
-            >
-              <HardHat className="w-4 h-4" />
-              <span>{dict.navBecomeWorker}</span>
-            </Link>
-          </nav>
-
-          {/* Right Action Buttons */}
-          <div className="hidden md:flex items-center gap-3">
-            {currentUser ? (
-              <div className="flex items-center gap-2">
-                <Link
-                  href={getDashboardHref()}
-                  className="px-4 py-2 rounded-xl text-sm font-semibold bg-brand-800 text-white hover:bg-brand-900 transition-all shadow-sm flex items-center gap-2"
-                >
-                  {currentUser.role === 'worker' && <HardHat className="w-4 h-4 text-teal-300" />}
-                  {currentUser.role === 'customer' && <Calendar className="w-4 h-4 text-brand-300" />}
-                  {currentUser.role === 'admin' && <ShieldAlert className="w-4 h-4 text-amber-300" />}
-                  <span>{getDashboardLabel()}</span>
-                </Link>
-
-                <button
-                  onClick={() => logout()}
-                  title="Sign out"
-                  className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/login"
-                  className="px-4 py-2 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors"
-                >
-                  {dict.navLogin}
-                </Link>
-                <Link
-                  href="/signup"
-                  className="px-4 py-2 rounded-xl text-sm font-semibold bg-teal-600 text-white hover:bg-teal-700 transition-all shadow-sm"
-                >
-                  Get Started
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {/* Mobile Menu Button */}
-          <div className="flex items-center gap-2 md:hidden">
-            <Link
-              href={getDashboardHref()}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-800 text-white"
-            >
-              {currentUser ? 'Portal' : 'Login'}
-            </Link>
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg"
-              aria-label="Toggle menu"
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
+          )}
+          <button
+            type="button"
+            className="rounded-lg p-2 text-stone-800 hover:bg-stone-100"
+            aria-expanded={open}
+            aria-controls="site-menu"
+            onClick={() => setOpen(!open)}
+            aria-label={open ? t('nav.closeMenu') : t('nav.menu')}
+          >
+            {open ? <X className="h-6 w-6" aria-hidden /> : <Menu className="h-6 w-6" aria-hidden />}
+          </button>
         </div>
       </div>
 
-      {/* Mobile Drawer Menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-6 space-y-2">
-          <Link
-            href="/"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 rounded-lg text-base font-medium text-slate-800 hover:bg-slate-50"
-          >
-            Home
-          </Link>
-          <Link
-            href="/workers"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 rounded-lg text-base font-medium text-slate-800 hover:bg-slate-50"
-          >
-            {dict.navFindWorkers}
-          </Link>
-          <Link
-            href="/worker/register"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 rounded-lg text-base font-medium text-teal-700 hover:bg-teal-50"
-          >
-            {dict.navBecomeWorker}
-          </Link>
-          <Link
-            href="/how-it-works"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 rounded-lg text-base font-medium text-slate-800 hover:bg-slate-50"
-          >
-            {dict.navHowItWorks}
-          </Link>
-          <Link
-            href="/about"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 rounded-lg text-base font-medium text-slate-800 hover:bg-slate-50"
-          >
-            {dict.navAbout}
-          </Link>
-          <Link
-            href="/blueprint"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 rounded-lg text-base font-medium text-teal-700 hover:bg-teal-50"
-          >
-            Business Blueprint
-          </Link>
-
-          <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
-            <Link
-              href={getDashboardHref()}
-              onClick={() => setMobileMenuOpen(false)}
-              className="w-full text-center py-2.5 rounded-xl font-semibold bg-brand-800 text-white"
-            >
-              {getDashboardLabel()}
-            </Link>
-          </div>
+      {open && (
+        <div id="site-menu" className="border-t border-stone-200 bg-white">
+          <nav aria-label={t('nav.menu')} className="container-page grid gap-1 py-3 sm:grid-cols-2 lg:grid-cols-4">
+            {[...items, ...more].map((i) => (
+              <Link
+                key={i.href}
+                href={i.href}
+                aria-current={isActive(i.href) ? 'page' : undefined}
+                className={cn('rounded-lg px-3 py-3 text-base font-medium', isActive(i.href) ? 'bg-brand-50 text-brand-900' : 'text-stone-800 hover:bg-stone-100')}
+              >
+                {t(i.key)}
+              </Link>
+            ))}
+            {user ? (
+              <button type="button" onClick={doLogout} className="rounded-lg px-3 py-3 text-left text-base font-medium text-stone-800 hover:bg-stone-100">
+                {t('nav.logout')} ({user.name})
+              </button>
+            ) : (
+              <>
+                <Link href="/login" className="rounded-lg px-3 py-3 text-base font-medium text-stone-800 hover:bg-stone-100">
+                  {t('nav.login')}
+                </Link>
+                <Link href="/signup" className="rounded-lg px-3 py-3 text-base font-semibold text-brand-800 hover:bg-brand-50">
+                  {t('nav.signup')}
+                </Link>
+              </>
+            )}
+          </nav>
         </div>
       )}
     </header>

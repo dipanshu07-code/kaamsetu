@@ -1,4 +1,4 @@
-export type UserRole = 'customer' | 'worker' | 'admin';
+export type UserRole = 'customer' | 'worker' | 'employer' | 'admin';
 
 export type ServiceCategorySlug = 
   | 'maid-housekeeping'
@@ -8,6 +8,7 @@ export type ServiceCategorySlug =
   | 'carpenter'
   | 'general-labour'
   | 'shifting-assistant'
+  | 'construction'
   | 'childcare'; // Disabled initially for safeguarding
 
 export interface ServiceCategory {
@@ -103,7 +104,8 @@ export type BookingStatus =
   | 'in_progress'
   | 'completed'
   | 'cancelled'
-  | 'disputed';
+  | 'disputed'
+  | 'expired';
 
 export interface Booking {
   id: string;

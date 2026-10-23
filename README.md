@@ -1,161 +1,98 @@
-# KaamSetu (कामसेतु) — Local Services Marketplace
+# KaamSetu (कामसेतु)
 
-> **Tagline:** Connecting Local Workers with Trusted Opportunities.
+A local-work platform for India with two separate workflows:
 
-KaamSetu is a two-sided local services marketplace designed for the Indian market. It connects urban households with verified local service workers (maids, cooks, electricians, plumbers, carpenters, general labour, shifting assistants) while giving workers digital ownership of their reputation through a portable **Digital Work Passport**, transparent rate cards, and 100% direct client payments with zero platform commission.
+1. **Repairs and home visits** (plumbers, electricians, maids and other helpers). A customer posts a problem, the nearby workers who are free at that time get an alert, the customer compares replies, chats, and agrees a price. Customers can also book a specific worker directly.
+2. **Longer-term jobs** (construction and other trades). Employers post full-time, part-time, temporary, contract or daily-wage jobs, and workers apply with a professional profile.
 
----
+The interface is available in **English and Hindi**. Customers pay workers directly in cash or by UPI, and KaamSetu takes no commission.
 
-## 🌟 Key Features
-
-### 1. For Customers & Households
-- **Faceted Worker Discovery:** Filter workers by trade category, colony/locality (e.g. Lajpat Nagar, Koramangala, Kothrud, Andheri), availability ("Available Today"), experience, and pricing model.
-- **Local Price Intelligence:** Transparent market rate benchmarks for visiting fees, repair jobs, and monthly domestic contracts so customers know what to expect before booking.
-- **Digital Work Passport Inspection:** View authentic customer ratings, verified phone/screening badges, and before-and-after photographic proof of work.
-- **Interactive Booking Flow:** Request bookings by selecting preferred dates, time windows, and addresses without any upfront payment.
-- **One-Click Rehire & Replacement Assistance:** Quickly rebook previously hired workers or find alternative verified workers in your locality if a booking cancels.
-- **Job-Linked Reviews & Grievance Desk:** Post reviews linked exclusively to completed jobs and track complaint tickets in real-time.
-
-### 2. For Service Workers
-- **Zero Commission Deductions:** 100% of customer payments go directly to the worker via UPI QR code or cash upon satisfactory job completion.
-- **Portable Digital Work Passport:** Every completed job and customer review permanently enriches the worker’s digital credential record.
-- **Duty Status Toggle:** Switch "Available Today" on or off with a single click from the mobile dashboard.
-- **Full Booking Autonomy:** Accept or decline incoming requests based on schedule, locality, and job scope.
-- **Proof-of-Work Logging:** Add repair notes and customer sign-off confirmations on-site.
-- **Privacy-Conscious Onboarding:** Never asks for confidential Aadhaar numbers or bank passwords.
-
-### 3. Administrator Console & Governance
-- **Role-Based Governance:** Overview dashboard with live KPIs (Total Workers, Bookings, Completed Jobs, Cancellation Rate %, Grievance Rate %).
-- **Verification Approvals Queue:** Inspect trade credentials, telephone verification, and colony reference checks to approve the "Verified Worker" badge.
-- **Dispute & Grievance Resolution:** Investigate customer or worker dispute tickets, enter official mediation summaries, and resolve cases.
-- **Service Safeguarding Controls:** Capability to pause or enable categories. (Childcare services are strictly disabled in the pilot pending enhanced safeguarding).
-- **Administrative Audit Trail:** Immutable log of all sensitive verification, category, and dispute actions.
+> **Status:** pilot-quality software. It has automated and end-to-end tests (see [docs/IMPLEMENTATION_REPORT.md](docs/IMPLEMENTATION_REPORT.md)) but has **not** had a professional security audit or legal review. Do not describe it as production-ready, fully secure or legally compliant.
 
 ---
 
-## 🏗️ Architecture & Tech Stack
+## Architecture
 
-- **Frontend & App Framework:** Next.js 14 App Router, React 18, TypeScript
-- **Styling & UI:** Tailwind CSS, Lucide Icons, Mobile-first responsive layout
-- **Database & Backend:** Supabase with PostgreSQL (15 relational tables with primary keys, foreign keys, constraints, and indexes)
-- **Security & Authorization:** Supabase Row Level Security (RLS) policies isolating customer bookings, worker records, and admin privileges
-- **Offline / Zero-Config Live Mode:** Stateful reactive client store (`src/lib/store.ts`) with pre-seeded authentic Indian profiles and bookings that runs interactively out-of-the-box without requiring remote credentials
-- **Testing:** Automated Vitest test suite covering booking workflows, filters, price intelligence, and passport verifications
+| Layer | Technology |
+| --- | --- |
+| App framework | Next.js 15 (App Router), React 19, TypeScript |
+| UI | Tailwind CSS, lucide-react icons, self-hosted Inter + Noto Sans Devanagari fonts |
+| API | Next.js route handlers under `src/app/api/**` (thin), with business logic in `src/server/services/**` |
+| Database | PostgreSQL. Production uses `pg` and `DATABASE_URL` (e.g. Supabase Postgres). Local dev and tests use **PGlite**, an embedded Postgres running the same SQL |
+| Auth | Mobile number + password (scrypt), opaque session token in an httpOnly SameSite=Lax cookie; only a SHA-256 hash is stored server-side |
+| Validation | zod on every request body and query |
+| i18n | `src/lib/i18n/{en,hi}.ts` flat dictionaries. TypeScript fails the build if a Hindi key is missing |
+| Realtime | Polling (chat every 4 s, unread counts every 30 s). No realtime provider is configured |
 
----
-
-## 📂 Project Directory Structure
-
-```text
-├── src/
-│   ├── app/
-│   │   ├── page.tsx                    # Complete Homepage with Hero, Search, Categories, FAQ
-│   │   ├── layout.tsx                  # Global layout with Demo Role Switcher, Navbar, Footer
-│   │   ├── globals.css                 # Tailwind directives & theme styles
-│   │   ├── workers/
-│   │   │   ├── page.tsx                # Faceted Worker Directory & Search
-│   │   │   └── [id]/page.tsx           # Worker Profile & Digital Work Passport
-│   │   ├── customer/
-│   │   │   └── dashboard/page.tsx      # Customer Dashboard (Bookings, Reviews, Grievance)
-│   │   ├── worker/
-│   │   │   ├── dashboard/page.tsx      # Worker Dashboard (Incoming Requests, Earnings, Passport)
-│   │   │   └── register/page.tsx       # Privacy-conscious worker onboarding
-│   │   ├── admin/
-│   │   │   └── page.tsx                # Protected Admin Console & Audit Log
-│   │   ├── login/page.tsx              # OTP / 1-Click Role Login
-│   │   ├── signup/page.tsx             # Customer Registration
-│   │   ├── how-it-works/page.tsx       # Detailed How It Works breakdown
-│   │   ├── about/page.tsx              # Mission, Pilot localities & Safety standards
-│   │   ├── cancellation-policy/page.tsx# Cancellation & Replacement policy
-│   │   └── grievance/page.tsx          # Grievance Redressal & Ticket Tracking Desk
-│   ├── components/
-│   │   ├── Navbar.tsx                  # Responsive Navigation Bar
-│   │   ├── Footer.tsx                  # Footer with honest trust disclaimers
-│   │   ├── RoleDemoToolbar.tsx         # 1-Click Role Switcher (Customer / Worker / Admin)
-│   │   ├── WorkerCard.tsx              # Worker Card with Verified / Self-Reported badges
-│   │   ├── BookingModal.tsx            # End-to-end interactive booking modal
-│   │   ├── ReviewModal.tsx             # Job-linked review modal (punctuality, quality, behavior)
-│   │   ├── ComplaintModal.tsx          # Grievance filing modal
-│   │   ├── ReplacementAssistanceModal.tsx # Alternative worker suggestion modal
-│   │   └── PriceIntelligenceCard.tsx   # Local price benchmarks and disclaimers
-│   ├── lib/
-│   │   ├── mock-data.ts                # Authentic Indian demo dataset (Delhi, BLR, Mumbai, Pune)
-│   │   ├── store.ts                    # Stateful persistent application store
-│   │   ├── supabase.ts                 # Supabase client with graceful local fallback
-│   │   └── utils.ts                    # INR currency formatter, Indian phone helper, dictionary
-│   ├── types/
-│   │   └── index.ts                    # Complete TypeScript domain contracts
-│   └── __tests__/
-│       ├── booking-flow.test.ts        # Booking lifecycle & review eligibility tests
-│       ├── worker-filter.test.ts       # Filtering, price intelligence, safeguarding tests
-│       └── passport-verification.test.ts# Passport credentials & admin governance tests
-├── supabase/
-│   └── migrations/
-│       ├── 20261018000001_kaamsetu_schema.sql # 15 relational tables DDL
-│       ├── 20261018000002_rls_policies.sql    # Row Level Security SQL policies
-│       └── 20261018000003_seed_data.sql       # Initial PostgreSQL seed data
-├── .env.example                        # Template environment variables
-├── package.json
-└── tsconfig.json
+```
+src/
+  app/                  pages (client components) and app/api route handlers
+  components/           ui.tsx (design system), domain.tsx, ChatPanel, forms/…
+  lib/                  domain.ts (shared rules), i18n/, api.ts, session.tsx, mock-data.ts (demo seed source)
+  server/
+    db.ts               pg / PGlite driver, migration runner
+    auth.ts http.ts     sessions, roles, origin check, rate limiting, error handling
+    seed.ts             labelled demo data
+    services/           accounts, workers, bookings, requests, chat, jobs, verification, support, admin
+supabase/migrations/    SQL migrations (the 3 original files + 4 new ones)
+scripts/                migrate.ts, create-admin.ts
 ```
 
----
+## Running locally
 
-## 🚀 Getting Started
-
-### 1. Installation
-Clone the repository and install dependencies:
 ```bash
 npm install
+npm run dev            # http://localhost:3000
 ```
 
-### 2. Environment Variables
-Copy `.env.example` to `.env.local`:
+With no `DATABASE_URL`, an embedded Postgres is created in `.data/pglite`, migrations run automatically, and **labelled demo data** is seeded. The demo accounts all use the password `demo-pass-123` (override with `KAAMSETU_DEMO_PASSWORD`), and the login page shows one-tap buttons for them:
+
+| Role | Mobile |
+| --- | --- |
+| Customer (Priya) | 9812345678 |
+| Electrician (Rameshwar) | 9810123456 |
+| Plumber (Arjun) | 9811122233 |
+| Employer (Malhotra Constructions) | 9800000002 |
+| Admin | 9800000001 |
+
+Demo workers carry a "Demo profile" label and demo jobs a "Demo listing" label. **No ratings, reviews or passed verification checks are seeded**; those only come from real activity.
+
+To reset local data, stop the server and delete `.data/`.
+
+## Commands
+
 ```bash
-cp .env.example .env.local
-```
-> **Note:** KaamSetu runs in full interactive mode out of the box with sample data without requiring any external keys. Adding Supabase keys enables cloud database synchronization.
-
-### 3. Running the Development Server
-```bash
-npm run dev
-```
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-### 4. Running Automated Tests
-```bash
-npm test
-```
-Runs the 14 automated test suites covering booking lifecycle, review eligibility, search filters, and passport verifications.
-
-### 5. Production Build
-```bash
-npm run build
-npm start
+npm test               # unit + integration tests (in-memory Postgres)
+npm run typecheck
+npm run build && npm start
+npm run db:migrate     # apply migrations to DATABASE_URL (or local PGlite)
+ADMIN_PHONE=… ADMIN_NAME=… ADMIN_PASSWORD=… npm run create-admin
 ```
 
----
+## Deploying with Supabase / Postgres
 
-## 🗄️ Database Setup & Migrations (Supabase)
+1. Create a Supabase project, or any Postgres 14+ with the `btree_gist` and `uuid-ossp` extensions available.
+2. Set `DATABASE_URL` to the **server-side** connection string. Keep it secret: it is never sent to the browser.
+3. Run `npm run db:migrate`.
+   - On a database where the original three SQL files were already pasted into the SQL editor, the runner detects the existing tables and marks those three as applied.
+   - If `bookings_no_overlap` fails to apply, the database already contains overlapping bookings. Resolve them first.
+4. Create an admin: `npm run create-admin`.
+5. Leave `KAAMSETU_DEMO_SEED` unset or `false`.
+6. Deploy (`npm run build && npm start`, or a Node host).
 
-To connect your Supabase PostgreSQL instance:
-1. Create a project at [supabase.com](https://supabase.com).
-2. Open the **SQL Editor** in the Supabase Dashboard.
-3. Run the migrations in order:
-   - `supabase/migrations/20261018000001_kaamsetu_schema.sql` (Creates 15 tables and indexes)
-   - `supabase/migrations/20261018000002_rls_policies.sql` (Applies Row Level Security)
-   - `supabase/migrations/20261018000003_seed_data.sql` (Seeds initial service categories)
-4. Add your `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` to `.env.local`.
+PGlite stores data on local disk, so **serverless hosts need `DATABASE_URL`**.
 
----
+Migration `20261022000004` **revokes all anon/authenticated access** to public tables through the Supabase Data API, because the app reads and writes only from its server. It also keeps RLS enabled as a second layer. If you later want to query Supabase directly from the browser, you must design and grant those policies deliberately.
 
-## 🛡️ Trust & Safeguarding Policy
+## Key behaviours
 
-- **No False Safety Guarantees:** Verification badges signify verified telephone numbers, residential screening, and skill demonstrations. They do not claim 100% foolproof safety.
-- **Childcare Safeguarding:** Childcare services are intentionally locked with clear notices until in-person biometric screening and emergency child welfare protocols are operational.
-- **Direct Settlements:** 0% platform cuts. Customers settle directly with workers via UPI or cash upon satisfactory work inspection.
+- **Conflict-free scheduling.** A worker's time is reserved from *accepted* through *in progress*. Overlaps are refused by the service layer (row lock, plus working hours, time off and existing bookings) **and** by a Postgres exclusion constraint, so simultaneous attempts cannot double-book. Cancelling, declining or expiry releases the time. Other users only ever see "Unavailable at this time".
+- **Price agreement.** A booking becomes *confirmed* only when one party accepts the other's price offer. Chat messages never confirm anything.
+- **Privacy by stage.**
+  - Workers see only the locality until they accept a booking.
+  - Phone numbers are exchanged only once a booking is confirmed.
+  - Workers are shown publicly at area level only, never their home address.
+- **Childcare safeguarding.** The category is paused by default. Even when enabled, a worker is listed and bookable only once identity, two references, police verification, first aid and child-safety training checks have all passed and are unexpired. A safety complaint puts the worker on hold immediately.
+- **No identity documents are stored.** Checks record *how* they were done (e.g. "original document seen in person"), never an Aadhaar number or a copy.
 
----
-
-## 📄 License
-MIT License. Built for local Indian communities and service workers.
+See [docs/PRIVACY_AND_SECURITY.md](docs/PRIVACY_AND_SECURITY.md) for controls and open legal questions, and [docs/IMPLEMENTATION_REPORT.md](docs/IMPLEMENTATION_REPORT.md) for what was changed, what was tested and the known limitations.
